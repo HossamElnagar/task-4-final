@@ -1,0 +1,31 @@
+name: Docker Compose Integration Test
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  integration-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Start Docker Compose Stack
+        run: docker compose up -d
+
+      - name: Wait for Services to Initialize
+        run: sleep 15
+
+      - name: Run Network Test
+        run: curl -f http://localhost:8080 || exit 1
+
+      - name: Show Container Logs
+        if: always()
+        run: docker compose logs
+
+      - name: Tear Down Docker Compose Stack
+        if: always()
+        run: docker compose down
